@@ -1,1 +1,1 @@
-# eventbooking-webservices
+# Microservices for eventbooking
