@@ -11,7 +11,6 @@ import (
 
 	"github.com/gorilla/mux"
 )
-
 type eventServiceHandler struct {
 	dbhandler persistence.DatabaseHandler
 }

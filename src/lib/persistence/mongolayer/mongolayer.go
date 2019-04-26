@@ -7,6 +7,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+
 const (
 	DB     = "myevents"
 	USERS  = "users"
