@@ -3,7 +3,7 @@ module github.com/amaumba1/eventbooking
 require (
 	github.com/Shopify/sarama v1.22.1
 	github.com/gorilla/handlers v1.4.0 // indirect
-	github.com/gorilla/mux v1.7.1
+	github.com/gorilla/mux v1.7.2
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/martin-helmich/cloudnativego-backend v0.0.0-20171222210257-6148b3bb66f2
 	github.com/mitchellh/mapstructure v1.1.2
