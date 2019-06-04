@@ -6,20 +6,24 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	//"time"
+	"time"
+
 
 	"github.com/amaumba1/eventbooking/src/lib/persistence"
-	//"github.com/amaumba1/eventbooking/src/contracts"
+	"github.com/amaumba1/eventbooking/src/lib/msgqueue"
+	"github.com/amaumba1/eventbooking/src/contracts"
 	"github.com/gorilla/mux"
 )
 
 type eventServiceHandler struct {
 	dbhandler persistence.DatabaseHandler
+	eventEmitter msgqueue.EventEmitter
 }
 
-func NewEventHandler(databasehandler persistence.DatabaseHandler) *eventServiceHandler {
+func NewEventHandler(dbhandler persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) *eventServiceHandler {
     return &eventServiceHandler{
-        dbhandler: databasehandler,
+				dbhandler: dbhandler,
+				eventEmitter: eventEmitter,
     }
 }
 
@@ -87,4 +91,11 @@ func (eh *eventServiceHandler) NewEventHandler(w http.ResponseWriter, r *http.Re
         fmt.Fprintf(w, "{error: error occured while persisting event %d %s}",id, err)
         return
 		}
+		msg := contracts.EventCreatedEvent{
+			ID: hex.EncodeToString(id),
+			Name: event.Name,
+			Start: time.Unix(event.StartDate, 0),
+			End: time.Unix(event.EndDate, 0),
+		}
+		eh.eventEmitter.Emit(&msg)
 	}

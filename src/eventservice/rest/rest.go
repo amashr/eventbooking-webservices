@@ -4,28 +4,20 @@ import (
 	"net/http"
 
 	"github.com/amaumba1/eventbooking/src/lib/persistence"
+	"github.com/amaumba1/eventbooking/src/lib/msgqueue"
 
 	"github.com/gorilla/mux"
 )
 
-	func ServeAPI(endpoint, tlsendpoint string, databasehandler persistence.DatabaseHandler) (chan error, chan error) { 
-			handler := NewEventHandler(databasehandler)
+	func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) error { 
+			handler := NewEventHandler(dbHandler, eventEmitter)
 			r := mux.NewRouter() 
 			eventsrouter := r.PathPrefix("/events").Subrouter()     
 			eventsrouter.Methods("GET").Path("/{SearchCriteria}/{search}").HandlerFunc(handler.FindEventHandler) 
 			eventsrouter.Methods("GET").Path("").HandlerFunc(handler.AllEventHandler) 
-			eventsrouter.Methods("POST").Path("").HandlerFunc(handler.NewEventHandler) 
-			httpErrChan := make(chan error) 
-			httptlsErrChan := make(chan error) 
+			eventsrouter.Methods("POST").Path("").HandlerFunc(handler.NewEventHandler)
 
-			go func() { 
-				httptlsErrChan <- http.ListenAndServeTLS(tlsendpoint, "cert.pem", "key.pem", r) 
-			}() 
-			go func() { 
-				httpErrChan <- http.ListenAndServe(endpoint, r) 
-			}() 
-
-			return httpErrChan, httptlsErrChan
+			return http.ListenAndServe(endpoint, r)
 	} 
 
 	

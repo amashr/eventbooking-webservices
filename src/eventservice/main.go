@@ -7,12 +7,23 @@ import (
 	"github.com/amaumba1/eventbooking/src/eventservice/rest"
 	"github.com/amaumba1/eventbooking/src/lib/configuration"
 	"github.com/amaumba1/eventbooking/src/lib/persistence/dblayer"	
+	//"github.com/streadway/amqp"
+	//"os"
 )
 
 func main() {
 	confPath := flag.String("conf", `./configuration/config.json`, "flag to set the path to the configuration json file")
 	//extract configuration
 	config, _ := configuration.ExtractConfiguration(*confPath)
+	conn, err := amqp.Dial(config.AMQPMessageBroker)
+	if err != nil {
+		panic(err)
+	}
+
+	emitter, err := msgqueue_amqp.NewAMQPEventEmitter(conn)
+	if err != nil {
+		panic(err)
+	}
 
 	log.Println("Connecting to database")
 	dbhandler, err := dblayer.NewPersistenceLayer(config.Databasetype, config.DBConnection)
