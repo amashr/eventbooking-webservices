@@ -11,7 +11,8 @@ var (
       DBTypeDefault       = dblayer.DBTYPE("mongodb") 
       DBConnectionDefault = "mongodb://127.0.0.1" 
       RestfulEPDefault    = "localhost:8181" 
-      RestfulTLSEPDefault = "localhost:9191"
+			MessageBrokerTypeDefault = "amqp"
+			AMQPMessageBrokerDefault = "amqp://guest:guest@localhost:5672"
     )
 
 type ServiceConfig struct { 
@@ -27,7 +28,8 @@ func ExtractConfiguration(filename string) (ServiceConfig, error) {
                DBTypeDefault, 
                DBConnectionDefault, 
 							 RestfulEPDefault,
-							 RestfulTLSEPDefault,
+							 MessageBrokerTypeDefault,
+							 AMQPMessageBrokerDefault,
 							}
 					
    file, err := os.Open(filename) 
