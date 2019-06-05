@@ -98,4 +98,10 @@ func (eh *eventServiceHandler) NewEventHandler(w http.ResponseWriter, r *http.Re
 			End: time.Unix(event.EndDate, 0),
 		}
 		eh.eventEmitter.Emit(&msg)
+
+		w.Header().Set("Content-Type","application/json;charset=utf8")
+		w.WriteHeader(201)
+		json.NewEncoder(w).Encode(&event)
 	}
+
+

@@ -5,13 +5,14 @@ import (
 	
 	"github.com/streadway/amqp"
 	"encoding/json"
+	"github.com/amaumba1/eventbooking/src/lib/msgqueue"
 )
 
 type amqpEventEmitter struct {
 	connection *amqp.Connection
 }
 
-func NewAMQPEventEmitter(conn *amqp.Connection) (EventEmitter, error ){
+func NewAMQPEventEmitter(conn *amqp.Connection) (msgqueue.EventEmitter, error ){
 	emitter := &amqpEventEmitter{
 		connection: conn,
 	}
@@ -23,7 +24,7 @@ func NewAMQPEventEmitter(conn *amqp.Connection) (EventEmitter, error ){
 	return emitter, nil
 }
 
-func (a *amqpEventEmitter) Emit(event Event) error {
+func (a *amqpEventEmitter) Emit(event msgqueue.Event) error {
 	jsonDoc, err := json.Marshal(event)
 	if err != nil {
 		return err
