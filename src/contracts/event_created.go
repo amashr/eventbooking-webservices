@@ -11,6 +11,10 @@ type EventCreatedEvent struct {
 	End           time.Time `json:"end_time"`
 }
 
-func (e *EventCreatedEvent) EventName() string {
-	return "event.created"
+// func (e *EventCreatedEvent) EventName() string {
+// 	return "event.created"
+// }
+
+func (e *EventCreatedEvent) PartitionKey() {
+	return e.ID
 }
