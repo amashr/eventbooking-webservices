@@ -1,6 +1,7 @@
 
 package msgqueue
 
+// EventEmitter describes an interface for a struct that emits events
 type EventEmitter interface {
-	Emit(event Event) error 
+	Emit(e Event) error 
 }

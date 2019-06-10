@@ -11,8 +11,8 @@ import (
 )
 
 type EventProcessor struct {
-	EventListener msgqueue.EventListener
-	Database persistence.DatabaseHandler 
+	EventListener  msgqueue.EventListener
+	Database  persistence.DatabaseHandler 
 }
 
 func (p *EventProcessor) ProcessEvents() error {

@@ -3,17 +3,46 @@ package kafka
 
 import (
 	"github.com/Shopify/sarama"
-	"github.com/mitchellh/mapstructure"
+	//"github.com/mitchellh/mapstructure"
 	"github.com/amaumba1/eventbooking/src/lib/msgqueue"
-	"github.com/amaumba1/eventbooking/src/contracts"
+	"github.com/amaumba1/eventbooking/src/lib/helper/kafka"
 	"encoding/json"
 	"log"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type kafkaEventListener struct {
 	consumer  sarama.Consumer
 	partitions []int32
+	mapper msgqueue.EventMapper
+}
+
+func NewKafkaEventListenerFromEnvironment() (msgqueue.EventListener, error ) {
+	 brokers := []string{"localhost:9092"}
+	 partitions := []int32{}
+
+	 if brokerList := os.Getenv("KAFKA_BROKERS"); brokerList != "" {
+		 brokers = strings.Split(brokerList, ",")
+	 }
+
+	 if partitionList := os.Getenv("KAFKA_PARTITIONS"); partitionList != "" {
+		 partitionStrings := strings.Split(partitionList, ",")
+		 partitions = make([]int32, len(partitionStrings))
+
+		 for i := range partitionStrings {
+			 partition, err := strconv.Atoi(partitionStrings[i])
+			 if err != nil {
+				 return nil, err
+			 }
+			 partitions[i] = int32(partition)
+		 }
+	 }
+	 client := <-kafka.RetryConnect(brokers, 5*time.Second)
+	 return NewKafkaEventListener(client, partitions)
 }
 
 func NewKafkaEventListener(client sarama.Client, partitions []int32) (msgqueue.EventListener, error) {
@@ -24,6 +53,7 @@ func NewKafkaEventListener(client sarama.Client, partitions []int32) (msgqueue.E
 	listener := &kafkaEventListener{
 		consumer: consumer,
 		partitions: partitions,
+		mapper: msgqueue.NewEventMapper(),
 	}
 	return listener, nil
 }
@@ -45,40 +75,42 @@ func (k *kafkaEventListener) Listen(events ...string) (<-chan msgqueue.Event, <-
 	log.Printf("topic %s has partitions: %v", topic, partitions)
 
 	for _, partition := range partitions {
-		con, err := k.consumer.ConsumePartition(topic, partition, 0)
+		log.Printf("consuming partition %s: %d", topic, partition)
+
+		pConsumer, err := k.consumer.ConsumePartition(topic, partition, 0)
 		if err != nil {
 			return nil, nil, err
 		}
 		go func() {
-			for msg := range con.Messages() {
+			for msg := range pConsumer.Messages() {
+				log.Printf("received message %v", msg)
+
 				body := messageEnvelope{}
 				err := json.Unmarshal(msg.Value, &body)
 				if err != nil {
 					errors <- fmt.Errorf("could not JSON-decode message: %s", err)
 					continue
 				}
-				var event msgqueue.Event
-				switch body.EventName{
-				case "event.created":
-					event = contracts.EventCreatedEvent{}
-				case "location.created":
-					event = constracts.LocationCreatedEvent{}
-				default:
-					errors <- fmt.Errorf("unknown event type: %s", body.EventName)
-					continue
-				}
-				cfg := mapstructure.DecoderConfig{
-					Result: event,
-					TagName: "json",
-				}
-				err = mapstructure.NewDecoder(&cfg).Decode(body.Payload)
+
+				event, err := k.mapper.MapEvent(body.EventName, body.Payload)
 				if err != nil {
-					errors <- fmt.Errorf("could not map event %s", body.EventName, err)
+					errors <- fmt.Errorf("could not map message: %v", err)
+					continue
 				}
 				results <- event
 			}
 		}()
+
+		go func() {
+			for err := range pConsumer.Errors() {
+				errors <- err
+			}
+		}()
 	}
 	return results, errors, nil
+}
+
+func (l *kafkaEventListener) Mapper() msgqueue.EventMapper {
+	return l.mapper
 }
 
