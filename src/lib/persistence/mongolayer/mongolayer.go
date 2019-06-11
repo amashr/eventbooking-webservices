@@ -20,9 +20,6 @@ type MongoDBLayer struct {
 
 func NewMongoDBLayer(connection string) ( persistence.DatabaseHandler, error) {
 	s, err := mgo.Dial(connection)
-	if err != nil {
-	return nil, err
-	}
 	return &MongoDBLayer{
 		session: s,
 	}, err
@@ -92,7 +89,7 @@ func (l *MongoDBLayer) FindLocation(id string) (persistence.Location, error) {
 	return locations, err
 }
 
-func (l *MongoDBLayer) FindAllLocation() ([]persistence.Location, error) {
+func (l *MongoDBLayer) FindAllLocations() ([]persistence.Location, error) {
 	s := l.getFreshSession()
 	defer s.Close()
 	locations := []persistence.Location{}

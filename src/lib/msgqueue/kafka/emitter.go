@@ -2,14 +2,15 @@
 package kafka
 
 import (
-	"github.com/Shopify/sarama"
-	"github.com/amaumba1/eventbooking/src/lib/msgqueue"
-	"github.com/amaumba1/eventbooking/src/lib/helper/kafka"
 	"encoding/json"
 	"log"
-	"time"
-	"strings"
 	"os"
+	"strings"
+	"time"
+
+	"github.com/Shopify/sarama"
+	"github.com/amaumba1/eventbooking/src/lib/helper/kafka"
+	"github.com/amaumba1/eventbooking/src/lib/msgqueue"
 )
 
 type kafkaEventEmitter struct {
@@ -17,8 +18,8 @@ type kafkaEventEmitter struct {
 }
 
 type messageEnvelope struct {
-	EventName string `json:"eventName"`
-	Payload interface{} `json:"payload`
+	EventName string      `json:"eventName"`
+	Payload   interface{} `json:"payload"`
 }
 
 func NewKafkaEventEmitterFromEnvironment() (msgqueue.EventEmitter, error) {
@@ -37,26 +38,30 @@ func NewKafkaEventEmitter(client sarama.Client) (msgqueue.EventEmitter, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	emitter := kafkaEventEmitter{
 		producer: producer,
 	}
-	return &emitter, err
+
+	return &emitter, nil
 }
 
-func (k *kafkaEventEmitter) Emit(eventName msgqueue.Event) error {
+func (k *kafkaEventEmitter) Emit(evt msgqueue.Event) error {
 	jsonBody, err := json.Marshal(messageEnvelope{
-			evt.EventName(),
-			evt,
+		evt.EventName(),
+		evt,
 	})
-		if err != nil {
-			return err
+	if err != nil {
+		return err
 	}
+
 	msg := &sarama.ProducerMessage{
-		Topic: "event",
+		Topic: "events",
 		Value: sarama.ByteEncoder(jsonBody),
 	}
-	log.Printf("published message with topic %s: %v", evt.EventName(), jsonBody)
 
-	_,_, err = k.producer.SendMessage(msg)
+	log.Printf("published message with topic %s: %v", evt.EventName(), jsonBody)
+	_, _, err = k.producer.SendMessage(msg)
+
 	return err
 }
