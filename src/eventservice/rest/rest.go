@@ -3,29 +3,26 @@ package rest
 import (
 	"net/http"
 
-	"github.com/amaumba1/eventbooking/src/lib/persistence"
-
 	"github.com/gorilla/mux"
+	"github.com/amaumba1/eventbooking/src/lib/msgqueue"
+	"github.com/amaumba1/eventbooking/src/lib/persistence"
 )
 
-	func ServeAPI(endpoint, tlsendpoint string, databasehandler persistence.DatabaseHandler) (chan error, chan error) { 
-			handler := NewEventHandler(databasehandler)
-			r := mux.NewRouter() 
-			eventsrouter := r.PathPrefix("/events").Subrouter()     
-			eventsrouter.Methods("GET").Path("/{SearchCriteria}/{search}").HandlerFunc(handler.FindEventHandler) 
-			eventsrouter.Methods("GET").Path("").HandlerFunc(handler.AllEventHandler) 
-			eventsrouter.Methods("POST").Path("").HandlerFunc(handler.NewEventHandler) 
-			httpErrChan := make(chan error) 
-			httptlsErrChan := make(chan error) 
+func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) error {
+	handler := newEventHandler(dbHandler, eventEmitter)
 
-			go func() { 
-				httptlsErrChan <- http.ListenAndServeTLS(tlsendpoint, "cert.pem", "key.pem", r) 
-			}() 
-			go func() { 
-				httpErrChan <- http.ListenAndServe(endpoint, r) 
-			}() 
+	r := mux.NewRouter()
+	eventsrouter := r.PathPrefix("/events").Subrouter()
+	eventsrouter.Methods("GET").Path("/{SearchCriteria}/{search}").HandlerFunc(handler.findEventHandler)
+	eventsrouter.Methods("GET").Path("").HandlerFunc(handler.allEventHandler)
+	eventsrouter.Methods("GET").Path("/{eventID}").HandlerFunc(handler.oneEventHandler)
+	eventsrouter.Methods("POST").Path("").HandlerFunc(handler.newEventHandler)
 
-			return httpErrChan, httptlsErrChan
-	} 
+	locationRouter := r.PathPrefix("/locations").Subrouter()
+	locationRouter.Methods("GET").Path("").HandlerFunc(handler.allLocationsHandler)
+	locationRouter.Methods("POST").Path("").HandlerFunc(handler.newLocationHandler)
+
+	return http.ListenAndServe(endpoint, r)
+}
 
 	
