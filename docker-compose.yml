@@ -13,7 +13,7 @@ services:
   kafkaevent:
     image: spotify/kafka
     ports: 
-      - XXXXX:XXXXX
+      - 9093:9092
     networks: 
       - eventbooking
   
@@ -35,10 +35,12 @@ services:
       - 8181:8181
       - 9100:9100
     depends_on:
-      - rabbitmq
+      - rabbitmqevent
+      - kafkaevent
       - events-db
     environment:
       - AMQP_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+      - KAFKA_BROKER_URLS=kafka://:9092/
       - MONGO_URL=mongodb://events-db/events
     networks:
       - eventbooking
@@ -51,17 +53,13 @@ services:
       - 8282:8181
       - 9101:9100
     depends_on:
-      - rabbitmq
+      - rabbitmqevent
+      - kafkaevent
       - bookings-db
     environment:
       - AMQP_BROKER_URL=amqp://guest:guest@rabbitmq:5672/
+      - KAFKA_BROKER_URLS=kafka://:9092/
       - MONGO_URL=mongodb://bookings-db/bookings
     networks:
       - eventbooking
   
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    ports:
-      - 80:80
