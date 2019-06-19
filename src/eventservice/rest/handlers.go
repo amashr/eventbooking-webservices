@@ -31,14 +31,14 @@ func (eh *eventServiceHandler) findEventHandler(w http.ResponseWriter, r *http.R
 	criteria, ok := vars["SearchCriteria"]
 	if !ok {
 		fmt.Fprint(w, `No search criteria found, you can either search by id via /id/4
-						to search by name via /name/coldplayconcert`)
+						to search by name via /name/diamondzconert`)
 		return
 	}
 
 	searchkey, ok := vars["search"]
 	if !ok {
 		fmt.Fprint(w, `No search keys found, you can either search by id via /id/4
-						to search by name via /name/coldplayconcert`)
+						to search by name via /name/alikibaconcert`)
 		return
 	}
 

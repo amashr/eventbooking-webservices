@@ -2,9 +2,9 @@
 // //users
 // {
 //   _id: 32323232,
-//     firstname: "Jack",
-//       lastname: "Kal",
-//         Age: 36,
+//     firstname: "Ally",
+//       lastname: "Maumba",
+//         Age: 31,
 //           Bookings: [{
 //             date: 73246872364, //maybe use native datetime type?
 //             eventid: 9324324324,
@@ -19,21 +19,21 @@
 // //events
 // {
 //   _id: 323243432,
-//     name: "opera aida",
+//     name: "diamondz conceert",
 //       startdate: 768346784368,
 //         enddate: 43988943,
 //           duration: 120, //in minutes
 //             location: {
 //     id: 3, //=>assign as an index
-//       name: "West Street Opera House",
-//         address: "11 west street, AZ 73646",
-//           country: "U.S.A",
+//       name: "Kinondoni leaders Club",
+//         address: "84 leaders Avenue",
+//           country: "Tanzania",
 //             opentime: 7,
 //               clostime: 20
 //     Hall: {
-//       name: "Cesar hall",
-//         location : "second floor, room 2210",
-//           capacity: 10
+//       name: "Leaders Hall",
+//         location : "first floor, room 234",
+//           capacity: 250
 //     }
 //   }
 // }

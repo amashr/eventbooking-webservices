@@ -1,16 +1,21 @@
-FROM golang:1.12
+FROM golang:alpine AS builder
 
 WORKDIR /go/src/github.com/amaumba1/eventbooking
 COPY . .
 
-# Download all the dependencies 
-RUN go get -d -v ./...
+WORKDIR /go/src/github.com/amaumba1/eventbooking
 
-# Install the package
-RUN go install -v ./...
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+
+FROM scratch
+
+COPY --from=0 /go/src/github.com/amaumba1/eventbooking/src/bookingservice/bookingservice /bookingservice
+
+WORKDIR /src/bookingservice/eventservice
 
 ENV LISTEN_URL=0.0.0.0:8181
 EXPOSE 8181
 
-# Run the executable
-CMD [/"bookingservice"]
+CMD [ "./main" ]
+
+
