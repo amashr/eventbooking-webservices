@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DB        = "myevents"
+	DB        = "eventbooking"
 	USERS     = "users"
 	EVENTS    = "events"
 	LOCATIONS = "locations"
