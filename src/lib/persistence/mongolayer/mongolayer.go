@@ -25,13 +25,14 @@ func NewMongoDBLayer(connection string) ( persistence.DatabaseHandler, error) {
 	}, err
 }
 
+
 func (mgoLayer *MongoDBLayer) AddUser(u persistence.User) ([]byte, error) {
 	s := mgoLayer.getFreshSession()
 	defer s.Close()
 	u.ID = bson.NewObjectId()
 	return []byte(u.ID), s.DB(DB).C(USERS).Insert(u)
 }
-
+ 
 func (mgoLayer *MongoDBLayer) AddEvent(e persistence.Event) ([]byte, error) {
     s := mgoLayer.getFreshSession()
     defer s.Close()
@@ -61,7 +62,7 @@ func (mgoLayer *MongoDBLayer) FindEventByName(name string) (persistence.Event, e
     s := mgoLayer.getFreshSession()
     defer s.Close()
     e := persistence.Event{}
-    err := s.DB(DB).C(EVENTS).Find(bson.M{"name": name}).One(&e)
+    err := s.DB(DB).C(EVENTS).Find(bson.M{"Name": name}).One(&e)
     return e, err
 }
 

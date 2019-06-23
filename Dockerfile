@@ -1,21 +1,16 @@
-FROM golang:alpine AS builder
+FROM golang:latest
+ENV SRC_DIR=/go/src/github.com/amaumba1/eventbooking/eventservice/
+ENV GOBIN=/go/bin
 
-WORKDIR /go/src/github.com/amaumba1/eventbooking
-COPY . .
+WORKDIR $GOBIN
 
-WORKDIR /go/src/github.com/amaumba1/eventbooking
+# Add the source code:
+ADD . $SRC_DIR
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+RUN cd /go/src/;
 
-FROM scratch
-
-COPY --from=0 /go/src/github.com/amaumba1/eventbooking/src/bookingservice/bookingservice /bookingservice
-
-WORKDIR /src/bookingservice/eventservice
+RUN go install -v ./...
+ENTRYPOINT [ "./eventservice" ]
 
 ENV LISTEN_URL=0.0.0.0:8181
 EXPOSE 8181
-
-CMD [ "./main" ]
-
-

@@ -8,11 +8,14 @@ import (
 
 type Event struct {
 	ID        bson.ObjectId `bson:"_id"`
-	Name      string        
-	Duration  int
-	StartDate int64
-	EndDate   int64
-	Location  Location
+	Name       string  
+	Image       string 
+	Price       int64
+	Description string       
+	Duration    int
+	StartDate   int64
+	EndDate     int64
+	Location    Location
 }
 
 type User struct {
